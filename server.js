@@ -24,6 +24,7 @@ connection.connect(err => {
   launchManager();
 });
 
+// I kinda wish I was better at ASCII art, but this will do now now
 const launchManager = () => {
   console.log('++++++++++++++++++++++++++++++++');
   console.log('+                              +');
@@ -33,6 +34,7 @@ const launchManager = () => {
   inquiryStart();
 }
 
+// now for the inquirer questions
 inquiryStart = () => {
   inquirer.prompt([
     {
@@ -119,5 +121,84 @@ inquiryStart = () => {
 
 // IN PROGRESS
 
+// Now for functions
+
+const listDepartments = () => {
+  const sql = `SELECT * FROM department`;
+
+  db.query(sql, (error, res) => {
+    if (error) throw error;
+    console.table(res);
+    inquiryStart();
+  });
+}
+
+const listRoles = () => {
+  const sql = `SELECT * FROM role`;
+
+  db.query(sql, (error, res) => {
+    if (error) throw error;
+    console.table(res);
+    inquiryStart();
+  });
+}
+
+const listEmployees = () => {
+  const sql = `SELECT * FROM employee`;
+
+  db.query(sql, (error, res) => {
+    if (error) throw error;
+    console.table(res);
+    inquiryStart();
+  });
+}
+
+const addDepartment = () => {
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'department',
+      message: 'What is the name of the new department you would like to add?'
+    }
+  ]).then((answer) => {
+    const sql = `INSERT INTO department (name) VALUES (?)`;
+    db.query(sql, answer.department, (error, res) => {
+      if (error) throw error;
+      console.log(`New department added: ${answer.department}.`);
+      inquiryStart();
+    });
+  });
+}
+
+const addEmployee = () => {
+  inquirer.prompt([
+    {
+      type: 'input',  
+      name: 'first_name',
+      message: 'What is the first name of the new employee you would like to add?'
+    },
+    {
+      type: 'input',
+      name: 'last_name',
+      message: 'What is the last name of the new employee you would like to add?'
+    },
+    {
+      type: 'list',
+      name: 'role_id',
+      message: 'What is the role of the new employee you would like to add?',
+      choices: function () {
+        // will get back to  this
+      }
 
 
+      
+// in progress, looking to add a prompt for which department the new role will be added to
+
+// const addRole = () => {
+//   inquirer.prompt([
+//     {
+//       type: 'input',
+//       name: 'role',
+//       message: 'What is the name of the new employee role you would like to add?'
+
+  

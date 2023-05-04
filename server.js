@@ -4,8 +4,8 @@ const inquirer = require('inquirer');
 // not yet used in current build
 const cTable = require('console.table');
 
+// const db = require('./config/connections')
 require('dotenv').config()
-console.log(process.env.db_password);
 
 const db = mysql.createConnection(
   {
@@ -17,6 +17,8 @@ const db = mysql.createConnection(
     database: 'employee_db'
   },
 );
+
+console.log(process.env.db_password);
 
 db.connect(error => {
   if (error) throw error;
@@ -134,10 +136,9 @@ const listDepartments = () => {
 }
 
 const listRoles = () => {
-  const sql = `SELECT * FROM role`;
+  const sql = `SELECT * FROM roles`;
 
   db.query(sql, (error, results) => {
-    dc
     if (error) throw error;
     console.table(results);
     inquiryStart();
@@ -297,7 +298,7 @@ const updateEmployeeRole = () => {
     },
     {
       type: 'list',
-      name: 'role',
+      name: 'roles',
       message: 'What is the new role of the employee?',
       choices: function () {
         let roleList = results[0].map(choice => choice.title);
@@ -307,9 +308,9 @@ const updateEmployeeRole = () => {
   ]).then((answer) => {
     // Updating the employee role based on employee name. WILL THIS ACTUALLY WORK???
     const sql = `UPDATE employee SET role_id = ? WHERE (first_name, last_name) VALUES (?, ?)`;
-    db.query(sql, [answer.role, answer.employee], (error, results) => {
+    db.query(sql, [answer.roles, answer.employee], (error, results) => {
       if (error) throw error;
-      console.log(`Employee role updated: ${answer.employee}'s role is now ${answer.role}.`);
+      console.log(`Employee role updated: ${answer.employee}'s role is now ${answer.roles}.`);
     });
     inquiryStart();
   });
@@ -365,7 +366,6 @@ const deleteDepartment = () => {
     inquiryStart();
   });
 }
-    
 
-
+launchManager();
 

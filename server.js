@@ -1,5 +1,5 @@
 // Code Goes Here
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
 
@@ -124,31 +124,32 @@ inquiryStart = () => {
 // Now for functions
 
 const listDepartments = () => {
-  const sql = `SELECT * FROM department`;
+  const sqlDeptList = `SELECT * FROM department`;
 
-  db.query(sql, (error, res) => {
+  db.query(sqlDeptList, (error, results) => {
     if (error) throw error;
-    console.table(res);
+    console.table(results);
     inquiryStart();
   });
 }
 
 const listRoles = () => {
-  const sql = `SELECT * FROM role`;
+  const sqlRoleList = `SELECT * FROM role`;
 
-  db.query(sql, (error, res) => {
+  db.query(sqlRoleList, (error, results) => {
+    dc
     if (error) throw error;
-    console.table(res);
+    console.table(results);
     inquiryStart();
   });
 }
 
 const listEmployees = () => {
-  const sql = `SELECT * FROM employee`;
+  const sqlEmployeeList = `SELECT * FROM employee`;
 
-  db.query(sql, (error, res) => {
+  db.query(sqlEmployeeList, (error, results) => {
     if (error) throw error;
-    console.table(res);
+    console.table(results);
     inquiryStart();
   });
 }
@@ -158,11 +159,19 @@ const addDepartment = () => {
     {
       type: 'input',
       name: 'department',
-      message: 'What is the name of the new department you would like to add?'
+      message: 'What is the name of the new department you would like to add?',
+      validate: addDept => {
+        if (addDept) {
+          return true;
+        } else {
+          console.log('Please enter a department name.');
+          return false;
+        }
+      }
     }
   ]).then((answer) => {
-    const sql = `INSERT INTO department (name) VALUES (?)`;
-    db.query(sql, answer.department, (error, res) => {
+    const sqlNewDept = `INSERT INTO department (name) VALUES (?)`;
+    db.query(sqlNewDept, answer.department, (error, results) => {
       if (error) throw error;
       console.log(`New department added: ${answer.department}.`);
       inquiryStart();
@@ -170,35 +179,193 @@ const addDepartment = () => {
   });
 }
 
+const addRole = () => {
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'title',
+      message: 'What is the title of the new role you would like to add?',
+      validate: addTitle => {
+        if (addTitle) {
+          return true;
+        } else {
+          console.log('Please enter a title for the new role.');
+          return false;
+        }
+      }
+    },
+    {
+      type: 'input',
+      name: 'salary',
+      message: 'What is the salary for the new role you would like to add?',
+      validate: addSalary => {
+        if (addSalary) {
+          return true;
+        } else {
+          console.log('Please enter a salary for the new role.');
+          return false;
+        }
+      }
+    },
+    {
+      type: 'list',
+      name: 'department',
+      message: 'What department does the new role belong to?',
+      choices: function () {
+        let departmentList = result[0].map(choice = choice.department)
+        return departmentList;
+      }
+    }
+  ]).then((answer) => {
+    const sqlNewRole = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
+    db.query(sqlNewRole, [answer.title, answer.salary, answer.department], (error, results) => {
+      if (error) throw error;
+      console.log(`New role added: ${answer.title} has been added ${answer.department}.`);
+      inquiryStart();
+    });
+  });
+}
+
+
+
 const addEmployee = () => {
   inquirer.prompt([
     {
-      type: 'input',  
+      type: 'input',
       name: 'first_name',
-      message: 'What is the first name of the new employee you would like to add?'
+      message: 'What is the first name of the new employee you would like to add?',
+      validate: addFirst => {
+        if (addFirst) {
+          return true;
+        } else {
+          console.log('Please enter a first name');
+          return false;
+        }
+      }
     },
     {
       type: 'input',
       name: 'last_name',
-      message: 'What is the last name of the new employee you would like to add?'
+      message: 'What is the last name of the new employee you would like to add?',
+      validate: addLast => {
+        if (addLast) {
+          return true;
+        } else {
+          console.log('Please enter a last name');
+          return false;
+        }
+      }
     },
     {
       type: 'list',
       name: 'role_id',
-      message: 'What is the role of the new employee you would like to add?',
+      message: "What is the role of the new employee?",
       choices: function () {
-        // will get back to  this
+        let roleList = results[0].map(choice => choice.title);
+        return roleList;
+      } 
+    },
+    {
+      type: 'list',
+      name: 'manager_id',
+      message: "Who is the manager of the new employee?",
+      choices: function () {
+        let managerList = results[0].map(choice => choice.manager);
+        return managerList;
       }
+    }
+  ]).then((answer) => {
+    const sqlNewEmployee  = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+    db.query(sqlNewEmployee, [answer.first_name, answer.last_name, answer.role_id, answer.manager_id], (error, results) => {
+      if (error) throw error;
+      console.log(`New employee added: ${answer.first_name} ${answer.last_name}.`);
+    });
+    inquiryStart();
+  });
+}
+
+const updateEmployeeRole = () => {
+  inquirer.prompt([
+    {
+      type: 'list',
+      name: 'employee',
+      message: 'Which employee would you like to update?',
+      choices: function () {
+        let employeeList = results[0].map(choice => choice.employee);
+        return employeeList;
+      }
+    },
+    {
+      type: 'list',
+      name: 'role',
+      message: 'What is the new role of the employee?',
+      choices: function () {
+        let roleList = results[0].map(choice => choice.title);
+        return roleList;
+      }
+    },
+  ]).then((answer) => {
+    // Updating the employee role based on employee name. WILL THIS ACTUALLY WORK???
+    const sqlUpdateEmployee = `UPDATE employee SET role_id = ? WHERE (first_name, last_name) VALUES (?, ?)`;
+    db.query(sqlUpdateEmployee, [answer.role, answer.employee], (error, results) => {
+      if (error) throw error;
+      console.log(`Employee role updated: ${answer.employee}'s role is now ${answer.role}.`);
+    });
+    inquiryStart();
+  });
+}
+
+const updateEmployeeManager = () => {
+  inquirer.prompt([
+    {
+      type: 'list',
+      name: 'employee',
+      message: 'Which employee would you like to update?',
+      choices: function () {
+        let employeeList = results[0].map(choice => choice.employee);
+        return employeeList;
+      }
+    },
+    {
+      type: 'list',
+      name: 'manager',
+      message: 'Who is the new manager of the employee?',
+      choices: function () {
+        let managerList = results[0].map(choice => choice.manager);
+        return managerList;
+      }
+    },
+  ]).then((answer) => {
+    const sqlUpdateManager = `UPDATE employee SET manager_id = ? WHERE (first_name, last_name) VALUES (?, ?)`;
+    db.query(sqlUpdateManager, [answer.manager, answer.employee], (error, results) => {
+      if (error) throw error;
+      console.log(`Employee manager updated: ${answer.employee}'s manager is now ${answer.manager}.`);
+    });
+    inquiryStart();
+  });
+}
+
+const deleteDepartment = () => {
+  inquirer.prompt([
+    {
+      type: 'list',
+      name: 'department',
+      message: 'Which department would you like to delete?',
+      choices: function () {
+        let departmentList = results[0].map(choice => choice.department);
+        return departmentList;
+      }
+    }
+  ]).then ((answer) => {
+    const sqlDeleteDepartment = `DELETE FROM department WHERE name = ?`;
+    db.query(sqlDeleteDepartment, [answer.department], (error, results) => {
+      if (error) throw error;
+      console.log(`Department deleted: ${answer.department} has been deleted.`);
+    });
+    inquiryStart();
+  });
+}
+    
 
 
-      
-// in progress, looking to add a prompt for which department the new role will be added to
 
-// const addRole = () => {
-//   inquirer.prompt([
-//     {
-//       type: 'input',
-//       name: 'role',
-//       message: 'What is the name of the new employee role you would like to add?'
-
-  

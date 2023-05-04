@@ -1,37 +1,37 @@
 // Code Goes Here
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
+// not yet used in current build
 const cTable = require('console.table');
 
-
 require('dotenv').config()
+console.log(process.env.db_password);
 
 const db = mysql.createConnection(
   {
     host: 'localhost',
     // MySQL username,
-    user: root,
+    user: 'root',
     // MySQL password
-    password: db_password,
-    database: employee_db
+    password: process.env.db_password,
+    database: 'employee_db'
   },
-  console.log(`Connected to the employee_db database.`)
 );
 
-connection.connect(err => {
-  if (err) throw err;
+db.connect(error => {
+  if (error) throw error;
   console.log('connection failed, reason pending')
-  launchManager();
 });
 
 // I kinda wish I was better at ASCII art, but this will do now now
 const launchManager = () => {
   console.log('++++++++++++++++++++++++++++++++');
-  console.log('+                              +');
-  console.log('+       Employee Tracker       +');
-  console.log('+                              +');
+  console.log('+///                          /+');
+  console.log('+//     Employee Tracker     //+');
+  console.log('+/                          ///+');
   console.log('++++++++++++++++++++++++++++++++');
   inquiryStart();
+
 }
 
 // now for the inquirer questions
@@ -114,7 +114,7 @@ inquiryStart = () => {
     }
 
     if (actions === 'Exit') {
-      connection.end();
+      db.end();
     };
   });
 };
@@ -124,9 +124,9 @@ inquiryStart = () => {
 // Now for functions
 
 const listDepartments = () => {
-  const sqlDeptList = `SELECT * FROM department`;
+  const sql = `SELECT * FROM department`;
 
-  db.query(sqlDeptList, (error, results) => {
+  db.query(sql, (error, results) => {
     if (error) throw error;
     console.table(results);
     inquiryStart();
@@ -134,9 +134,9 @@ const listDepartments = () => {
 }
 
 const listRoles = () => {
-  const sqlRoleList = `SELECT * FROM role`;
+  const sql = `SELECT * FROM role`;
 
-  db.query(sqlRoleList, (error, results) => {
+  db.query(sql, (error, results) => {
     dc
     if (error) throw error;
     console.table(results);
@@ -145,9 +145,9 @@ const listRoles = () => {
 }
 
 const listEmployees = () => {
-  const sqlEmployeeList = `SELECT * FROM employee`;
+  const sql = `SELECT * FROM employee`;
 
-  db.query(sqlEmployeeList, (error, results) => {
+  db.query(sql, (error, results) => {
     if (error) throw error;
     console.table(results);
     inquiryStart();
@@ -170,8 +170,8 @@ const addDepartment = () => {
       }
     }
   ]).then((answer) => {
-    const sqlNewDept = `INSERT INTO department (name) VALUES (?)`;
-    db.query(sqlNewDept, answer.department, (error, results) => {
+    const sql = `INSERT INTO department (name) VALUES (?)`;
+    db.query(sql, answer.department, (error, results) => {
       if (error) throw error;
       console.log(`New department added: ${answer.department}.`);
       inquiryStart();
@@ -217,8 +217,8 @@ const addRole = () => {
       }
     }
   ]).then((answer) => {
-    const sqlNewRole = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
-    db.query(sqlNewRole, [answer.title, answer.salary, answer.department], (error, results) => {
+    const sql = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
+    db.query(sql, [answer.title, answer.salary, answer.department], (error, results) => {
       if (error) throw error;
       console.log(`New role added: ${answer.title} has been added ${answer.department}.`);
       inquiryStart();
@@ -275,8 +275,8 @@ const addEmployee = () => {
       }
     }
   ]).then((answer) => {
-    const sqlNewEmployee  = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-    db.query(sqlNewEmployee, [answer.first_name, answer.last_name, answer.role_id, answer.manager_id], (error, results) => {
+    const sql  = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+    db.query(sql, [answer.first_name, answer.last_name, answer.role_id, answer.manager_id], (error, results) => {
       if (error) throw error;
       console.log(`New employee added: ${answer.first_name} ${answer.last_name}.`);
     });
@@ -306,8 +306,8 @@ const updateEmployeeRole = () => {
     },
   ]).then((answer) => {
     // Updating the employee role based on employee name. WILL THIS ACTUALLY WORK???
-    const sqlUpdateEmployee = `UPDATE employee SET role_id = ? WHERE (first_name, last_name) VALUES (?, ?)`;
-    db.query(sqlUpdateEmployee, [answer.role, answer.employee], (error, results) => {
+    const sql = `UPDATE employee SET role_id = ? WHERE (first_name, last_name) VALUES (?, ?)`;
+    db.query(sql, [answer.role, answer.employee], (error, results) => {
       if (error) throw error;
       console.log(`Employee role updated: ${answer.employee}'s role is now ${answer.role}.`);
     });
@@ -336,8 +336,8 @@ const updateEmployeeManager = () => {
       }
     },
   ]).then((answer) => {
-    const sqlUpdateManager = `UPDATE employee SET manager_id = ? WHERE (first_name, last_name) VALUES (?, ?)`;
-    db.query(sqlUpdateManager, [answer.manager, answer.employee], (error, results) => {
+    const sql = `UPDATE employee SET manager_id = ? WHERE (first_name, last_name) VALUES (?, ?)`;
+    db.query(sql, [answer.manager, answer.employee], (error, results) => {
       if (error) throw error;
       console.log(`Employee manager updated: ${answer.employee}'s manager is now ${answer.manager}.`);
     });
@@ -357,8 +357,8 @@ const deleteDepartment = () => {
       }
     }
   ]).then ((answer) => {
-    const sqlDeleteDepartment = `DELETE FROM department WHERE name = ?`;
-    db.query(sqlDeleteDepartment, [answer.department], (error, results) => {
+    const sql = `DELETE FROM department WHERE name = ?`;
+    db.query(sql, [answer.department], (error, results) => {
       if (error) throw error;
       console.log(`Department deleted: ${answer.department} has been deleted.`);
     });

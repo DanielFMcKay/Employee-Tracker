@@ -100,7 +100,7 @@ const inquiryStart = () => {
 
     if (actions === 'Delete a Department') {
       deleteDepartment();
-      console.log('Department has been deleted.');
+      console.log('Department will be deleted.');
     }
 
     if (actions === 'Delete a Role') {
@@ -191,7 +191,7 @@ const addDepartment = () => {
 const addRole = () => {
   const sql = 'SELECT * FROM department';
   db.query(sql, (err, results) => {
-    if (err) throw err; 
+    if (err) throw err;
     inquirer.prompt([
       {
         type: 'input',
@@ -362,28 +362,39 @@ const updateEmployeeManager = () => {
   });
 }
 
-const deleteDepartment = () => {
-  const sql = `SELECT * FROM department`;
-  db.query(sql, (err, results) => {
-    if (err) throw err;
-  inquirer.prompt([
-    {
-      type: 'list',
-      name: 'dept',
-      message: 'Which department would you like to delete?',
-      choices: function () {
-        let departmentList = results.map(({ department_name, id }) => ({ name: department_name, value: id }))
-        return departmentList;
-      }
-    }
-  ]).then((answer) => {
-    const sql2 = `DELETE FROM department WHERE name = ?`
-    db.query(sql2,  { department_name: answer.dept })
-      console.log(`Department deleted: ${answer.dept} has been deleted.`);
-    });
-    inquiryStart();
-  });
-}
 
+const deleteDepartment = () => {
+  db.query('SELECT * FROM department', (err, results) => {
+    if (err) throw err;
+
+    // Create an array of objects with a name and value property for each row
+
+
+    // Ask the user to select a value to delete from the list
+    inquirer.prompt([
+      {
+        type: 'list',
+        name: 'department',
+        message: 'Select a department to delete:',
+        choices: function () {
+          let departmentList = results.map(({ department_name, id }) => ({ name: department_name, value: id }))
+          return departmentList;
+        }
+      }
+    ]).then((answer) => {
+      // Construct the SQL query to delete the row with the specified ID
+      console.log("+    +    +    +    +    +    +");
+      console.log("Department successfully purged!");
+      console.log("+    +    +    +    +    +    +");
+      const sql = `DELETE FROM department WHERE id = ${answer.department}`;
+
+      // Execute the SQL query
+      db.query(sql, (err, result) => {
+        if (err) throw err;
+      });
+      listDepartments();
+    });
+  });
+};
 
 launchManager();

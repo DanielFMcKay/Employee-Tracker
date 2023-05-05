@@ -9,8 +9,9 @@ const db = mysql.createConnection(
   {
     host: 'localhost',
     user: 'root',
-    password: 'SilenceKit36^_^',
-    database: 'employee_db'
+    password: process.env.db_password,
+    database: 'employee_db',
+    port: 3306
   },
   // console.log(process.env.db_password)
 );

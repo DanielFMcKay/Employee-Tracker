@@ -1,4 +1,5 @@
 INSERT INTO department (department_name)
+VALUES
 ('Accounting'),
 ('IT & Infrastructure'),
 ('Legal & Subterfuge'),
@@ -36,7 +37,7 @@ VALUES
 ('High Inquisitor & Adjudicator', 450000, 7);
 
 
-INSERT INTO employee (first_name, last_name, role_id, manager_id)
+INSERT INTO employee (first_name, last_name, roles_id, manager_id)
 VALUES
 ('Alex', 'Pereira', 1, null),
 ('Benjamin', 'Graham', 2, 1),

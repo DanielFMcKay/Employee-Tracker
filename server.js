@@ -38,7 +38,7 @@ const launchManager = () => {
 
 // now for the inquirer questions
 inquiryStart = () => {
-  inquirer.prompt([
+  inquirer.prompt(
     {
       type: 'list',
       name: 'actions',
@@ -59,7 +59,7 @@ inquiryStart = () => {
         'Exit'
       ]
     }
-  ]).then((answers) => {
+  ).then((answers) => {
     const { actions } = answers;
 
     if (actions === 'List all Departments') {
@@ -259,7 +259,7 @@ const addEmployee = () => {
     },
     {
       type: 'list',
-      name: 'role_id',
+      name: 'roles_id',
       message: "What is the role of the new employee?",
       choices: function () {
         let roleList = results[0].map(choice => choice.title);
@@ -276,8 +276,8 @@ const addEmployee = () => {
       }
     }
   ]).then((answer) => {
-    const sql  = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-    db.query(sql, [answer.first_name, answer.last_name, answer.role_id, answer.manager_id], (error, results) => {
+    const sql  = `INSERT INTO employee (first_name, last_name, roles_id, manager_id) VALUES (?, ?, ?, ?)`;
+    db.query(sql, [answer.first_name, answer.last_name, answer.roles_id, answer.manager_id], (error, results) => {
       if (error) throw error;
       console.log(`New employee added: ${answer.first_name} ${answer.last_name}.`);
     });
@@ -307,7 +307,7 @@ const updateEmployeeRole = () => {
     },
   ]).then((answer) => {
     // Updating the employee role based on employee name. WILL THIS ACTUALLY WORK???
-    const sql = `UPDATE employee SET role_id = ? WHERE (first_name, last_name) VALUES (?, ?)`;
+    const sql = `UPDATE employee SET roles_id = ? WHERE (first_name, last_name) VALUES (?, ?)`;
     db.query(sql, [answer.roles, answer.employee], (error, results) => {
       if (error) throw error;
       console.log(`Employee role updated: ${answer.employee}'s role is now ${answer.roles}.`);

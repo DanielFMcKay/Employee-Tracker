@@ -2,7 +2,7 @@
   "name": "employee-tracker",
   "version": "1.0.0",
   "description": "This app is for managers to manage employees and departments in a company by a variety of criteria.",
-  "main": "index.js",
+  "main": "server.js",
   "license": "MIT",
   "scripts": {
     "start": "node server.js",
@@ -16,8 +16,7 @@
     "mysql2": "^3.2.4",
     "node": "^20.1.0",
     "nodemon": "^2.0.22",
-    "sequelize": "^6.31.1",
-    "uniqid": "^5.4.0"
+    "sequelize": "^6.31.1"
   },
   "keywords": [],
   "author": ""

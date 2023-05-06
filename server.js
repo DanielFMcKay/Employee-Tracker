@@ -277,10 +277,10 @@ const addEmployee = () => {
       // FLAG FIX THIS BELOW
       {
         type: 'list',
-        name: 'manager_id',
+        name: 'manager',
         message: "Who is the manager of the new employee?",
         choices: function () {
-          let managerList = results.map(choice => choice.manager);
+          let managerList = results.map(choice => ({ name: (choice.first_name) + " " + (choice.last_name), value: choice.id }));
           return managerList;
         }
       }
@@ -289,8 +289,8 @@ const addEmployee = () => {
       db.query(sql2, [answer.first_name, answer.last_name, answer.roles_id, answer.manager_id], (err, results) => {
         if (err) throw err;
         console.log(`New employee added: ${answer.first_name}" "${answer.last_name}.`);
+        inquiryStart();
       });
-      inquiryStart();
     });
   });
 }

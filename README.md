@@ -26,9 +26,9 @@
 
 * The application can be launched in your Command Line Editor with either the command _npm start_ or _node server.js_. It is recommended there is an ample number of visible rows in the CLI to see what is happening, at least 12 or so.
 
-## Demonstration Walkthrough Video
+## Walkthrough Demonstration Video
 
-* To Be Added Later
+* https://drive.google.com/file/d/1Hrws0HorkeduX5luvLcBLimD8xoEE5ux/view
 
 ## User Story
 

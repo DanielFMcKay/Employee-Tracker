@@ -1,5 +1,5 @@
 // Code Goes Here
-// const mysql = require('mysql2');
+
 const inquirer = require('inquirer');
 
 require('console.table');
@@ -8,7 +8,7 @@ const db = require('./config/connections')
 
 
 
-// I kinda wish I was better at ASCII art, but this will do now now
+// Start Page Ascii Art
 const launchManager = () => {
   console.log('++++++++++++++++++++++++++++++++');
   console.log('+///                          /+');
@@ -37,7 +37,7 @@ const inquiryStart = () => {
         'Add a Department',
         'Add a Role',
         'Add an Employee',
-        // 'Update an Employee Role',
+        'Update an Employee Role',
         'Update an Employee Manager',
         'Delete a Department',
         // 'Delete a Role',
@@ -75,6 +75,7 @@ const inquiryStart = () => {
 
     if (actions === 'Update an Employee Role') {
       updateEmployeeRole();
+      console.log("Employee's role will be updated.");
     }
 
     if (actions === 'Update an Employee Manager') {
@@ -87,10 +88,10 @@ const inquiryStart = () => {
       console.log('Department will be deleted.');
     }
 
-    if (actions === 'Delete a Role') {
-      deleteRole();
-      console.log('Role will be deleted.');
-    }
+    // if (actions === 'Delete a Role') {
+    //   deleteRole();
+    //   console.log('Role will be deleted.');
+    // }
 
     if (actions === 'Exterminate an Employee') {
       purgeEmployee();
@@ -109,9 +110,9 @@ const inquiryStart = () => {
   });
 };
 
-// IN PROGRESS
 
-// Functions to take action below
+
+// Functions to take action are below
 
 const listDepartments = () => {
   const sql = `SELECT * FROM department`;
@@ -232,7 +233,6 @@ const addRole = () => {
 
 
 
-//  FLAG TO DO
 const addEmployee = () => {
   const sql = 'SELECT * FROM department INNER JOIN roles ON department.id = roles.department_id INNER JOIN employee ON roles.id = employee.roles_id';
   db.query(sql, (err, results) => {
@@ -293,41 +293,9 @@ const addEmployee = () => {
   });
 }
 
-// FLAG NEXT TO COMPLETE?
+
 const updateEmployeeRole = () => {
-  const query = `UPDATE employee SET roles_id = ? WHERE (first_name, last_name) VALUES (?, ?)`;
-  db.query(query, (err, results) => {
-    if (err) throw err;
-    inquirer.prompt([
-      {
-        type: 'list',
-        name: 'employee',
-        message: 'Which employee would you like to update?',
-        choices: function () {
-          let employeeList = results[0].map(choice => choice.employee);
-          return employeeList;
-        }
-      },
-      {
-        type: 'list',
-        name: 'roles',
-        message: 'What is the new role of the employee?',
-        choices: function () {
-          let roleList = results[0].map(choice => choice.title);
-          return roleList;
-        }
-      },
-    ]).then((answer) => {
-      // Updating the employee role based on employee name. WILL THIS ACTUALLY WORK???
-      console.log(`Employee role updated: ${answer.employee}'s role is now ${answer.roles}.`);
-    });
-    inquiryStart();
-  });
-}
-
-
-const updateEmployeeManager = () => {
-  const sql = `SELECT * FROM employee`;
+  const sql = 'SELECT * FROM roles INNER JOIN employee ON roles.id = employee.roles_id';
   db.query(sql, (err, results) => {
     if (err) throw err;
     inquirer.prompt([
@@ -342,92 +310,128 @@ const updateEmployeeManager = () => {
       },
       {
         type: 'list',
-        name: 'manager',
-        message: 'Who is the new manager of the employee?',
-        // MAKE THE MANAGER LIST PLZ (because like, it's needed both here and probably for "show employees" anyway)
+        name: 'title',
+        message: 'What is the new role of the employee?',
         choices: function () {
-          let managerList = results.map(choice => ({ name: (choice.first_name) + " " + (choice.last_name), value: choice.id }));
-          return managerList;
+          let roleList = results.map(({ title, id }) => ({ name: title, value: id }));
+          return roleList;
         }
       },
     ]).then((answer) => {
-      const sql2 = `UPDATE employee SET manager_id = ? WHERE id = ?`
-      db.query(sql2, [answer.manager, answer.employee], (err, results) => {
+      const sql2 = `UPDATE employee SET roles_id = ? WHERE id = ?`;
+      db.query(sql2, [answer.employee, answer.title], (err, results) => {
         if (err) throw err;
-        console.log(`Employee manager updated: employee #${answer.employee}'s manager is now manager #${answer.manager}.`)
-      });
-      inquiryStart();
-    });
-
-  });
-}
-
-
-const deleteDepartment = () => {
-  db.query('SELECT * FROM department', (err, results) => {
-    if (err) throw err;
-
-    // Create an array of objects with a name and value property for each row
-
-
-    // Ask the user to select a value to delete from the list
-    inquirer.prompt([
-      {
-        type: 'list',
-        name: 'department',
-        message: 'Select a department to delete:',
-        choices: function () {
-          let departmentList = results.map(({ department_name, id }) => ({ name: department_name, value: id }))
-          return departmentList;
-        }
-      }
-    ]).then((answer) => {
-      // return confirmation of deletion
-      console.log("+    +    +    +    +    +    +");
-      console.log("Department successfully purged!");
-      console.log("+    +    +    +    +    +    +");
-      const sql = `DELETE FROM department WHERE id = ${answer.department}`;
-
-      db.query(sql, (err, result) => {
-        if (err) throw err;
-        // return the updated list of departments
-        listDepartments();
-      });
-    });
-  });
-};
-
-
-const purgeEmployee = () => {
-  db.query('SELECT * FROM employee', (err, results) => {
-    if (err) throw err;
-    inquirer.prompt([
-      {
-        type: 'list',
-        name: 'employee',
-        message: 'Select an employee to liquidate:',
-        choices: function () {
-          let employeeList = results.map(choice => ({ name: (choice.first_name) + " " + (choice.last_name), value: choice.id }));
-          return employeeList;
-        }
-      }
-    ]).then((answer) => {
-
-      console.log("+ + + + + + + + + + + + + + + +");
-      console.log("+Employee Successfully Purged!+");
-      console.log("+ + + + + + + + + + + + + + + +");
-      console.log("+     They Never Existed      +");
-      console.log("+ + + + + + + + + + + + + + + +");
-      
-      const sql2 = `DELETE FROM employee WHERE id = ${answer.employee}`;
-
-      // Execute the SQL query
-      db.query(sql2, answer.employee, (err, result) => {
-        if (err) throw err;
+        // Updating the employee role based on employee name. WILL THIS ACTUALLY WORK???
+        console.log(`Employee role updated: employee #${answer.employee}'s role has been updated, please confirm with employee list. ${answer.roles}.`);
         inquiryStart();
       });
     });
   });
-};
+}
 
-launchManager();
+
+const updateEmployeeManager = () => {
+    const sql = `SELECT * FROM employee`;
+    db.query(sql, (err, results) => {
+      if (err) throw err;
+      inquirer.prompt([
+        {
+          type: 'list',
+          name: 'employee',
+          message: 'Which employee would you like to update?',
+          choices: function () {
+            let employeeList = results.map(choice => ({ name: (choice.first_name) + " " + (choice.last_name), value: choice.id }));
+            return employeeList;
+          }
+        },
+        {
+          type: 'list',
+          name: 'manager',
+          message: 'Who is the new manager of the employee?',
+          // MAKE THE MANAGER LIST PLZ (because like, it's needed both here and probably for "show employees" anyway)
+          choices: function () {
+            let managerList = results.map(choice => ({ name: (choice.first_name) + " " + (choice.last_name), value: choice.id }));
+            return managerList;
+          }
+        },
+      ]).then((answer) => {
+        const sql2 = `UPDATE employee SET manager_id = ? WHERE id = ?`;
+        db.query(sql2, [answer.manager, answer.employee], (err, results) => {
+          if (err) throw err;
+          console.log(`Employee manager updated: employee #${answer.employee}'s manager is now manager #${answer.manager}.`)
+          inquiryStart();
+        });
+      });
+
+    });
+  }
+
+
+  const deleteDepartment = () => {
+    db.query('SELECT * FROM department', (err, results) => {
+      if (err) throw err;
+
+      // Create an array of objects with a name and value property for each row
+
+
+      // Ask the user to select a value to delete from the list
+      inquirer.prompt([
+        {
+          type: 'list',
+          name: 'department',
+          message: 'Select a department to delete:',
+          choices: function () {
+            let departmentList = results.map(({ department_name, id }) => ({ name: department_name, value: id }))
+            return departmentList;
+          }
+        }
+      ]).then((answer) => {
+        // return confirmation of deletion
+        console.log("+    +    +    +    +    +    +");
+        console.log("Department successfully purged!");
+        console.log("+    +    +    +    +    +    +");
+        const sql = `DELETE FROM department WHERE id = ${answer.department}`;
+
+        db.query(sql, (err, result) => {
+          if (err) throw err;
+          // return the updated list of departments
+          listDepartments();
+        });
+      });
+    });
+  };
+
+
+  const purgeEmployee = () => {
+    db.query('SELECT * FROM employee', (err, results) => {
+      if (err) throw err;
+      inquirer.prompt([
+        {
+          type: 'list',
+          name: 'employee',
+          message: 'Select an employee to liquidate:',
+          choices: function () {
+            let employeeList = results.map(choice => ({ name: (choice.first_name) + " " + (choice.last_name), value: choice.id }));
+            return employeeList;
+          }
+        }
+      ]).then((answer) => {
+
+        console.log("+ + + + + + + + + + + + + + + +");
+        console.log("+Employee Successfully Purged!+");
+        console.log("+ + + + + + + + + + + + + + + +");
+        console.log("+     They Never Existed      +");
+        console.log("+ + + + + + + + + + + + + + + +");
+
+        const sql2 = `DELETE FROM employee WHERE id = ${answer.employee}`;
+
+        // Execute the SQL query
+        db.query(sql2, answer.employee, (err, result) => {
+          if (err) throw err;
+          inquiryStart();
+        });
+      });
+    });
+  };
+
+  launchManager();

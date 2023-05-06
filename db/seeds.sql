@@ -18,6 +18,7 @@ VALUES
 ('Full Stack Developer', 100000, 2),
 ('Systems Engineer', 85000, 2),
 ('Some Kind of Wizard', 105000, 2),
+
 ('Counsel on Retainer', 170000, 3),
 ('Lead Counsel', 320000, 3),
 ('Paralegal', 70000, 3),

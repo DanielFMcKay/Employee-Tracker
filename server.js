@@ -2,25 +2,9 @@
 // const mysql = require('mysql2');
 const inquirer = require('inquirer');
 
-// constant not yet used in current build
-
-const cTable = require('console.table');
+require('console.table');
 
 const db = require('./config/connections')
-// require('dotenv').config()
-
-// const db = mysql.createConnection(
-//   {
-//     host: 'localhost',
-//     // MySQL username,
-//     user: 'root',
-//     // MySQL password
-//     password: process.env.db_password,
-//     database: 'employee_db'
-//   },
-// );
-
-// console.log(process.env.db_password);
 
 
 
@@ -53,7 +37,7 @@ const inquiryStart = () => {
         'Add a Department',
         'Add a Role',
         'Add an Employee',
-        'Update an Employee Role',
+        // 'Update an Employee Role',
         'Update an Employee Manager',
         'Delete a Department',
         // 'Delete a Role',
@@ -221,7 +205,7 @@ const addRole = () => {
       },
       {
         type: 'list',
-        name: 'department',
+        name: 'department_id',
         message: 'What department does the new role belong to?',
         choices: function () {
           console.log(results);
@@ -230,12 +214,16 @@ const addRole = () => {
         }
       }
     ]).then((answer) => {
+      // LEARNING FLAG: use SET to insert multiple values into a table. I think using a ? after. Look it up. Or get co-pilot to explain it.
+      // It's just an alternate way, but likely simpler.
       const sql2 = `INSERT INTO roles (title, salary, department_id)
-      VALUES (${answer.title}, ${answer.salary}, ${answer.department})`;
+      VALUES (?, ?, ?)`;
 
-      db.query(sql2, answer.title, answer.salary, answer.department, (err, results) => {
+      // LEARNING FLAG: all your answers above become "answer", which is an array now,
+      // because they contain all the row IDs from the SQL table
+      db.query(sql2, [answer.title, answer.salary, answer.department_id], (err, results) => {
         if (err) throw err;
-        console.log(`New role added: ${answer.title} has been added ${answer.department}.`);
+        console.log(`New role added: ${answer.title} has been added to department #${answer.department_id}.`);
         inquiryStart();
       });
     });
@@ -244,10 +232,10 @@ const addRole = () => {
 
 
 
-
+//  FLAG TO DO
 const addEmployee = () => {
-  const sql = `INSERT INTO employee (first_name, last_name, roles_id, manager_id) VALUES (?, ?, ?, ?)`;
-  db.query(sql, [answer.first_name, answer.last_name, answer.roles_id, answer.manager_id], (err, results) => {
+  const sql = 'SELECT * FROM department INNER JOIN roles ON department.id = roles.department_id';
+  db.query(sql, (err, results) => {
     if (err) throw err;
     inquirer.prompt([
       {
@@ -281,26 +269,33 @@ const addEmployee = () => {
         name: 'roles_id',
         message: "What is the role of the new employee?",
         choices: function () {
-          let roleList = results[0].map(choice => choice.title);
+          let roleList = results.map(({ title, id }) => ({ name: title, value: id }));
           return roleList;
         }
       },
+
+      // FLAG FIX THIS BELOW
       {
         type: 'list',
         name: 'manager_id',
         message: "Who is the manager of the new employee?",
         choices: function () {
-          let managerList = results[0].map(choice => choice.manager);
+          let managerList = results.map(choice => choice.manager);
           return managerList;
         }
       }
     ]).then((answer) => {
-      console.log(`New employee added: ${answer.first_name} ${answer.last_name}.`);
+      const sql2 = `INSERT INTO employee (first_name, last_name, roles_id, manager_id) VALUES (?, ?, ?, ?)`;
+      db.query(sql2, [answer.first_name, answer.last_name, answer.roles_id, answer.manager_id], (err, results) => {
+        if (err) throw err;
+        console.log(`New employee added: ${answer.first_name}" "${answer.last_name}.`);
+      });
+      inquiryStart();
     });
-    inquiryStart();
   });
 }
 
+// FLAG NEXT TO COMPLETE?
 const updateEmployeeRole = () => {
   const query = `UPDATE employee SET roles_id = ? WHERE (first_name, last_name) VALUES (?, ?)`;
   db.query(query, (err, results) => {
@@ -332,33 +327,40 @@ const updateEmployeeRole = () => {
   });
 }
 
+// FLAG TO DO OPTIONAL
 const updateEmployeeManager = () => {
-  const query = `UPDATE employee SET manager_id = ? WHERE (first_name, last_name) VALUES (?, ?)`
-  db.query(query, (err, results) => {
-    if (err) // throw err;
-      inquirer.prompt([
-        {
-          type: 'list',
-          name: 'employee',
-          message: 'Which employee would you like to update?',
-          choices: function () {
-            let employeeList = results[0].map(choice => choice.employee);
-            return employeeList;
-          }
-        },
-        {
-          type: 'list',
-          name: 'manager',
-          message: 'Who is the new manager of the employee?',
-          choices: function () {
-            let managerList = results[0].map(choice => choice.manager);
-            return managerList;
-          }
-        },
-      ]).then((answer) => {
-        console.log(`Employee manager updated: ${answer.employee}'s manager is now ${answer.manager}.`);
+  const sql = `SELECT * FROM employee`;
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+    inquirer.prompt([
+      {
+        type: 'list',
+        name: 'employee',
+        message: 'Which employee would you like to update?',
+        choices: function () {
+          let employeeList = results.map(choice => ({ name: (choice.first_name) + " " + (choice.last_name), value: choice.id }));
+          return employeeList;
+        }
+      },
+      {
+        type: 'list',
+        name: 'manager',
+        message: 'Who is the new manager of the employee?',
+        // MAKE THE MANAGER LIST PLZ (because like, it's needed both here and probably for "show employees" anyway)
+        choices: function () {
+          let managerList = results.map(choice => ({ name: (choice.first_name) + " " + (choice.last_name), value: choice.id }));
+          return managerList;
+        }
+      },
+    ]).then((answer) => {
+      const sql2 = `UPDATE employee SET manager_id = ? WHERE id = ?`
+      db.query(sql2, [answer.manager, answer.employee], (err, results) => {
+        if (err) throw err;
+        console.log(`Employee manager updated: employee #${answer.employee}'s manager is now manager #${answer.manager}.`)
       });
-    inquiryStart();
+      inquiryStart();
+    });
+
   });
 }
 
@@ -391,8 +393,8 @@ const deleteDepartment = () => {
       // Execute the SQL query
       db.query(sql, (err, result) => {
         if (err) throw err;
+        listDepartments();
       });
-      listDepartments();
     });
   });
 };

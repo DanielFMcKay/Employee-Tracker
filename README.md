@@ -22,6 +22,10 @@
 
 * Once this has been done, using the CLI, please log into mysql using 'mysql -u root -p' and then enter your password. Then run the line 'source db/schema.sql' and then 'source db/seeds.sql' to inject the app's data tables and dummy seed data. Then exit mysql.
 
+## Application Launch
+
+* The application can be launched in your Command Line Editor with either the command _npm start_ or _node server.js_. It is recommended there is an ample number of visible rows in the CLI to see what is happening, at least 12 or so.
+
 ## Demonstration Walkthrough Video
 
 * To Be Added Later

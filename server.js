@@ -41,7 +41,7 @@ const inquiryStart = () => {
         'Update an Employee Manager',
         'Delete a Department',
         // 'Delete a Role',
-        // 'Exterminate an Employee',
+        'Exterminate an Employee',
         // 'View Department Budget',
         'Exit'
       ]
@@ -79,7 +79,7 @@ const inquiryStart = () => {
 
     if (actions === 'Update an Employee Manager') {
       updateEmployeeManager();
-      console.log('Employee manager has been updated.');
+      console.log('Employee manager will be updated.');
     }
 
     if (actions === 'Delete a Department') {
@@ -89,18 +89,18 @@ const inquiryStart = () => {
 
     if (actions === 'Delete a Role') {
       deleteRole();
-      console.log('Role has been deleted.');
+      console.log('Role will be deleted.');
     }
 
     if (actions === 'Exterminate an Employee') {
       purgeEmployee();
-      console.log('Target employee has been expunged from the company and erased from the historical record. They never existed.');
+      console.log('Target employee will be expunged from the company and erased from the historical record. They never existed.');
     }
 
-    if (actions === 'View Department Budget') {
-      viewBudget();
-      console.log('Departmental budget has been mathed out. Louie has immunity.');
-    }
+    // if (actions === 'View Department Budget') {
+    //   viewBudget();
+    //   console.log('Departmental budget will be mathed out. Louie has immunity.');
+    // }
 
     if (actions === 'Exit') {
       console.log("Goodbye.");
@@ -382,16 +382,49 @@ const deleteDepartment = () => {
         }
       }
     ]).then((answer) => {
-      // Construct the SQL query to delete the row with the specified ID
+      // return confirmation of deletion
       console.log("+    +    +    +    +    +    +");
       console.log("Department successfully purged!");
       console.log("+    +    +    +    +    +    +");
       const sql = `DELETE FROM department WHERE id = ${answer.department}`;
 
-      // Execute the SQL query
       db.query(sql, (err, result) => {
         if (err) throw err;
+        // return the updated list of departments
         listDepartments();
+      });
+    });
+  });
+};
+
+
+const purgeEmployee = () => {
+  db.query('SELECT * FROM employee', (err, results) => {
+    if (err) throw err;
+    inquirer.prompt([
+      {
+        type: 'list',
+        name: 'employee',
+        message: 'Select an employee to liquidate:',
+        choices: function () {
+          let employeeList = results.map(choice => ({ name: (choice.first_name) + " " + (choice.last_name), value: choice.id }));
+          return employeeList;
+        }
+      }
+    ]).then((answer) => {
+
+      console.log("+ + + + + + + + + + + + + + + +");
+      console.log("+Employee Successfully Purged!+");
+      console.log("+ + + + + + + + + + + + + + + +");
+      console.log("+     They Never Existed      +");
+      console.log("+ + + + + + + + + + + + + + + +");
+      
+      const sql2 = `DELETE FROM employee WHERE id = ${answer.employee}`;
+
+      // Execute the SQL query
+      db.query(sql2, answer.employee, (err, result) => {
+        if (err) throw err;
+        inquiryStart();
       });
     });
   });

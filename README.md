@@ -12,13 +12,15 @@
 
 * Additionally, per extra-credit criteria, employees and departments can also be eliminated, and employees' managers can be updated as well.
 
-* It also uses an .env file to separate the user's password.
+* It also uses an .env file to separate the user's password. 
 
 ## Installation
 
 * Inside the appropriate folder in the CLI of your choice, please execute 'git init -y' and then 'npm i' to install the correct packages declared in the package.json file to support the app. Note that the version of inquirer should only be 8.2.4 and not a later one, so if inquirer was entered manually, please revert to that one with the command "npm i inquirer@8.2.4". In addition to that one, main installations should be for dotenv, inquirer, express, mysql2, node, and console.table. Nodemon and sequelize are also installed in my app.
 
-* Once this has been done, please log into mysql using 'mysql -u root -p' and then enter your password. Then run the line 'source db/schema.sql' and then 'source db/seeds.sql' to inject the app's data tables and dummy seed data. Then exit mysql.
+* Also, please add an .env file to the app with your sql password. The .env file should only need the single line: "db_password='fakepassword'" with your password replacing fakepassword and without the out
+
+* Once this has been done, using the CLI, please log into mysql using 'mysql -u root -p' and then enter your password. Then run the line 'source db/schema.sql' and then 'source db/seeds.sql' to inject the app's data tables and dummy seed data. Then exit mysql.
 
 ## Demonstration Walkthrough Video
 

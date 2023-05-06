@@ -234,7 +234,7 @@ const addRole = () => {
 
 //  FLAG TO DO
 const addEmployee = () => {
-  const sql = 'SELECT * FROM department INNER JOIN roles ON department.id = roles.department_id';
+  const sql = 'SELECT * FROM department INNER JOIN roles ON department.id = roles.department_id INNER JOIN employee ON roles.id = employee.roles_id';
   db.query(sql, (err, results) => {
     if (err) throw err;
     inquirer.prompt([
@@ -273,8 +273,6 @@ const addEmployee = () => {
           return roleList;
         }
       },
-
-      // FLAG FIX THIS BELOW
       {
         type: 'list',
         name: 'manager',
@@ -286,9 +284,9 @@ const addEmployee = () => {
       }
     ]).then((answer) => {
       const sql2 = `INSERT INTO employee (first_name, last_name, roles_id, manager_id) VALUES (?, ?, ?, ?)`;
-      db.query(sql2, [answer.first_name, answer.last_name, answer.roles_id, answer.manager_id], (err, results) => {
+      db.query(sql2, [answer.first_name, answer.last_name, answer.roles_id, answer.manager], (err, results) => {
         if (err) throw err;
-        console.log(`New employee added: ${answer.first_name}" "${answer.last_name}.`);
+        console.log(`New employee added: ${answer.first_name} ${answer.last_name}.`);
         inquiryStart();
       });
     });
@@ -327,7 +325,7 @@ const updateEmployeeRole = () => {
   });
 }
 
-// FLAG TO DO OPTIONAL
+
 const updateEmployeeManager = () => {
   const sql = `SELECT * FROM employee`;
   db.query(sql, (err, results) => {
